@@ -16,22 +16,36 @@ def upload_and_process_pdf():
         if not os.path.exists(app.config['UPLOAD_FOLDER']):
             os.makedirs(app.config['UPLOAD_FOLDER'])
 
+        # Retrieve file from form
         file = request.files.get('file')
-        if file:
-            filename = secure_filename(file.filename)
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(filepath)
-            
-            # Process the uploaded file
+        if not file:
+            # If no file is provided, return an error or redirect
+            return "No file uploaded.", 400
+
+        # Process the uploaded file
+        filename = secure_filename(file.filename)
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(filepath)
+        
+        # Extract text and generate questions
+        try:
             text = extract_text_read(filepath)
             text_chunks = chunk_text(text)
             generated_questions = generate_questions_with_openai(text_chunks, openai_api_key)
-            qa_pairs = answer_questions(text, generated_questions)
-            
-            # Pass the questions and answers to your template
-            return render_template('question.html', qa_pairs=qa_pairs)
 
-    return render_template('upload.html')  # Your file upload form
+            # Check if questions were successfully generated
+            if not generated_questions:
+                return "No questions were generated from the uploaded file.", 400
 
+            # Pass the questions to your template
+            return render_template('question.html', questions=generated_questions)
+
+        except Exception as e:
+            # Handle exceptions and return an error message
+            print(f"An error occurred: {e}")
+            return f"An error occurred while processing the file: {e}", 500
+
+    # For GET requests or if no file was posted, show the upload form
+    return render_template('upload.html')
 if __name__ == "__main__":
     app.run(debug=True)
