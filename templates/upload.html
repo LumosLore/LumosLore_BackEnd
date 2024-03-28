@@ -1,0 +1,14 @@
+<!doctype html>
+<html>
+<head>
+    <title>Upload PDF</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+</head>
+<body>
+    <h1>Upload PDF File</h1>
+    <form action="/" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" />
+        <input type="submit" value="Upload">
+    </form>
+</body>
+</html>

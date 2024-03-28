@@ -1,0 +1,16 @@
+<!-- question.html -->
+<!doctype html>
+<html>
+<head>
+    <title>Questions and Answers</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+</head>
+<body>
+    <h1>Generated Questions and Answers</h1>
+    {% for qa_pair in qa_pairs %}
+        <p>Question: {{ qa_pair[0] }}</p>
+        <p>Answer: {{ qa_pair[1] }}</p>
+        <hr>
+    {% endfor %}
+</body>
+</html>
