@@ -3,6 +3,8 @@ import pdfminer
 from pdfminer.high_level import extract_text
 import openai
 import json
+from dotenv import load_dotenv
+import os
 
 def extract_text_from_pdf(pdf_path):
     return extract_text(pdf_path)
@@ -42,6 +44,6 @@ def main(pdf_path, openai_api_key):
     print("Questions generated and saved to questions.json.")
 
 if __name__ == "__main__":
-    #PDF_PATH = "sdgp.pdf"  # Specify the PDF path
-    OPENAI_API_KEY = "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"  # Use your actual OpenAI API key
+    PDF_PATH = "sdgp.pdf"  # Specify the PDF path
+    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")  # Use your actual OpenAI API key
     main(PDF_PATH, OPENAI_API_KEY)

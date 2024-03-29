@@ -1,13 +1,14 @@
 # app.py
 from flask import Flask, request, render_template, redirect
 from werkzeug.utils import secure_filename
+from dotenv import load_dotenv
 import os
 from pdfRead import extract_text_from_pdf as extract_text_read, answer_questions
 from pdfQuestion import generate_questions_with_openai, chunk_text
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
-openai_api_key = "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"  # Replace with your actual OpenAI API key
+openai_api_key = os.getenv("OPENAI_API_KEY")  # Replace with your actual OpenAI API key
 
 @app.route('/', methods=['GET', 'POST'])
 def upload_and_process_pdf():
