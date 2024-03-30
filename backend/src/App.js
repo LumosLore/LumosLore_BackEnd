@@ -12,10 +12,11 @@ const QuizApp = () => {
 
   // Fetch questions from the backend when the component mounts
   useEffect(() => {
-    axios.get('http://localhost:5000/questions') // URL with correct port
+    axios.get('http://localhost:5000/questions')
       .then(response => {
-        setQuestions(response.data.questions); // Assuming questions are in response.data.questions
-        setAnswers(Array(response.data.questions.length).fill(''));
+        console.log('Questions:', response.data);
+        setQuestions(response.data);
+        setAnswers(Array(response.data.length).fill(''));
       })
       .catch(error => console.error(error));
   }, []);
