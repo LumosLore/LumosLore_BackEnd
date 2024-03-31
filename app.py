@@ -1,52 +1,55 @@
-# app.py
-from flask import Flask, request, render_template, redirect
+from flask import Flask, request, render_template, redirect, url_for
 from werkzeug.utils import secure_filename
-from dotenv import load_dotenv
 import os
 from pdfRead import extract_text_from_pdf as extract_text_read, answer_questions
 from pdfQuestion import generate_questions_with_openai, chunk_text
+from flask_cors import CORS
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
+CORS(app)
 app.config['UPLOAD_FOLDER'] = 'uploads'
-openai_api_key = os.getenv("OPENAI_API_KEY")  # Replace with your actual OpenAI API key
+app.config['ALLOWED_EXTENSIONS'] = {'pdf'}
+
+openai_api_key = os.getenv("OPENAI_API_KEY")  # Make sure this is set in your environment variables
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
 @app.route('/', methods=['GET', 'POST'])
 def upload_and_process_pdf():
     if request.method == 'POST':
-        # Ensure the uploads folder exists
-        if not os.path.exists(app.config['UPLOAD_FOLDER']):
-            os.makedirs(app.config['UPLOAD_FOLDER'])
-
-        # Retrieve file from form
         file = request.files.get('file')
-        if not file:
-            # If no file is provided, return an error or redirect
-            return "No file uploaded.", 400
-
-        # Process the uploaded file
-        filename = secure_filename(file.filename)
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        file.save(filepath)
         
-        # Extract text and generate questions
+        # Check if the post request has the file part
+        if 'file' not in request.files or file.filename == '':
+            return "No file part in the request or no file selected.", 400
+        
+        # Check if file is allowed
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(filepath)
+        else:
+            return "Unsupported file type.", 400
+        
         try:
             text = extract_text_read(filepath)
             text_chunks = chunk_text(text)
             generated_questions = generate_questions_with_openai(text_chunks, openai_api_key)
 
-            # Check if questions were successfully generated
             if not generated_questions:
                 return "No questions were generated from the uploaded file.", 400
 
-            # Pass the questions to your template
             return render_template('question.html', questions=generated_questions)
-
         except Exception as e:
-            # Handle exceptions and return an error message
-            print(f"An error occurred: {e}")
+            print(f"An error occurred during file processing: {e}")
             return f"An error occurred while processing the file: {e}", 500
 
-    # For GET requests or if no file was posted, show the upload form
     return render_template('upload.html')
+
 if __name__ == "__main__":
     app.run(debug=True)
