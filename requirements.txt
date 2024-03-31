@@ -1,7 +1,0 @@
-Flask
-Werkzeug
-openai
-pdfminer.six==20201018  # Specific version to ensure compatibility
-fitz  # You might need to install PyMuPDF instead
-transformers
-gunicorn

@@ -1,4 +1,3 @@
-
 import pdfminer
 from pdfminer.high_level import extract_text
 import openai
